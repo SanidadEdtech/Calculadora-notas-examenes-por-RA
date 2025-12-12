@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Notas | Resultados de Aprendizaje</title>
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;600;700&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --color-bg: #F2F4F6;
+            --color-card: #FFFFFF;
+            --color-teal: #008080;
+            --color-teal-dark: #006666;
+            --color-text: #333333;
+            --color-error: #D32F2F;
+            --shadow-soft: 0 4px 12px rgba(0, 0, 0, 0.08);
+            --radius: 12px;
+            --font-main: 'Segoe UI', 'Roboto', 'Helvetica Neue', sans-serif;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--color-bg);
+            font-family: var(--font-main);
+            color: var(--color-text);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 650px;
+            margin-bottom: 60px; /* Space for footer */
+        }
+
+        .card {
+            background-color: var(--color-card);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-soft);
+            padding: 30px;
+            overflow: hidden;
+            animation: fadeIn 0.4s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        h1, h2, h3 {
+            color: var(--color-teal);
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+
+        h1 { font-size: 1.8rem; font-weight: 700; }
+        h2 { font-size: 1.4rem; font-weight: 600; margin-bottom: 1rem; }
+        h4 { color: var(--color-text); margin-bottom: 0.5rem; font-weight: 600; }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: #555;
+        }
+
+        input[type="number"] {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        input[type="number"]:focus {
+            outline: none;
+            border-color: var(--color-teal);
+        }
+
+        .btn {
+            display: block;
+            width: 100%;
+            background-color: var(--color-teal);
+            color: white;
+            border: none;
+            padding: 14px;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.1s;
+        }
+
+        .btn:hover {
+            background-color: var(--color-teal-dark);
+        }
+
+        .btn:active {
+            transform: scale(0.98);
+        }
+
+        .btn-secondary {
+            background-color: #9E9E9E;
+            margin-top: 10px;
+        }
+        .btn-secondary:hover { background-color: #757575; }
+
+        .error-msg {
+            color: var(--color-error);
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+            display: none;
+            text-align: center;
+        }
+
+        /* Dynamic Inputs Grid */
+        .ra-inputs-grid {
+            display: grid;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .ra-input-item {
+            background: #FAFAFA;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #EEEEEE;
+        }
+        
+        .ra-title {
+            color: var(--color-teal);
+            font-weight: bold;
+            margin-bottom: 10px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 5px;
+        }
+
+        .row {
+            display: flex;
+            gap: 10px;
+        }
+        .col { flex: 1; }
+
+        /* Results table styles */
+        .results-box {
+            text-align: center;
+        }
+        .final-grade {
+            font-size: 3rem;
+            font-weight: 800;
+            color: var(--color-teal);
+            margin: 20px 0;
+        }
+        .grade-label {
+            font-size: 1.2rem;
+            color: #666;
+        }
+        .breakdown-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            font-size: 0.95rem;
+        }
+        .breakdown-table th, .breakdown-table td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+        .breakdown-table th {
+            color: var(--color-teal);
+            font-weight: 600;
+        }
+        .breakdown-table td.num {
+            text-align: right;
+        }
+        
+        footer {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            background-color: transparent;
+            text-align: center;
+            padding: 15px;
+            color: #999;
+            font-size: 0.9rem;
+            pointer-events: none; /* Let clicks pass through if overlapping functionality */
+        }
+        
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <!-- STEP 1: Global Config -->
+        <div id="step-1" class="card">
+            <h1>Configuración del Examen</h1>
+            <div class="form-group">
+                <label for="totalQuestions">Número total de preguntas</label>
+                <input type="number" id="totalQuestions" placeholder="Ej. 50" min="1">
+            </div>
+            <div class="form-group">
+                <label for="penaltyValue">Valor que resta cada fallo</label>
+                <input type="number" id="penaltyValue" placeholder="Ej. 0.33" step="0.01" min="0">
+            </div>
+            <div class="form-group">
+                <label for="totalRAs">Número de RAs</label>
+                <input type="number" id="totalRAs" placeholder="Ej. 3" min="1">
+            </div>
+            <p id="error-step-1" class="error-msg"></p>
+            <button class="btn" onclick="goToStep2()">Siguiente</button>
+        </div>
+
+        <!-- STEP 2: Questions per RA -->
+        <div id="step-2" class="card hidden">
+            <h2>Asignación de Preguntas por RA</h2>
+            <p style="text-align:center; color:#666; margin-bottom:15px">
+                Total a asignar: <strong id="target-questions">0</strong>
+            </p>
+            <div id="ra-questions-container" class="ra-inputs-grid">
+                <!-- Generated by JS -->
+            </div>
+            <p id="error-step-2" class="error-msg"></p>
+            <button class="btn" onclick="goToStep3()">Siguiente</button>
+            <button class="btn btn-secondary" onclick="resetToStep1()">Atrás</button>
+        </div>
+
+        <!-- STEP 3: Grading -->
+        <div id="step-3" class="card hidden">
+            <h2>Introducción de Notas</h2>
+            <div id="ra-grading-container" class="ra-inputs-grid">
+                <!-- Generated by JS -->
+            </div>
+            <p id="error-step-3" class="error-msg"></p>
+            <button class="btn" onclick="calculateFinalGrade()">Calcular Nota Final</button>
+            <button class="btn btn-secondary" onclick="backToStep2()">Atrás</button>
+        </div>
+
+        <!-- RESULTS -->
+        <div id="results" class="card hidden">
+            <h2>Resultados Finales</h2>
+            <div class="results-box">
+                <div class="grade-label">Nota Final</div>
+                <div id="final-score-display" class="final-grade">0.00</div>
+            </div>
+            
+            <table class="breakdown-table">
+                <thead>
+                    <tr>
+                        <th>RA</th>
+                        <th class="num">Neto</th>
+                        <th class="num">Nota (0-10)</th>
+                        <th class="num">Ponderada</th>
+                    </tr>
+                </thead>
+                <tbody id="results-body">
+                    <!-- Results here -->
+                </tbody>
+            </table>
+
+            <br>
+            <button class="btn" onclick="resetGrading()">Calcular Nuevo Alumno</button>
+            <button class="btn btn-secondary" onclick="fullReset()">Nueva Configuración</button>
+        </div>
+    </div>
+
+    <footer>
+        Realizado por Vera López (@sanidadedtech)
+    </footer>
+
+    <script>
+        // State
+        let config = {
+            totalQuestions: 0,
+            penalty: 0,
+            numRAs: 0,
+            raQuestions: [] // Array of numbers
+        };
+
+        // DOM Elements
+        const screens = {
+            step1: document.getElementById('step-1'),
+            step2: document.getElementById('step-2'),
+            step3: document.getElementById('step-3'),
+            results: document.getElementById('results')
+        };
+
+        // Navigation Controllers
+        function showScreen(screenId) {
+            Object.values(screens).forEach(el => el.classList.add('hidden'));
+            screens[screenId].classList.remove('hidden');
+        }
+
+        // STEP 1 LOGIC
+        function goToStep2() {
+            const tQ = parseInt(document.getElementById('totalQuestions').value);
+            const pen = parseFloat(document.getElementById('penaltyValue').value);
+            const tRA = parseInt(document.getElementById('totalRAs').value);
+
+            if (!tQ || tQ < 1) return showError('error-step-1', 'Introduzca un número total de preguntas válido.');
+            if (isNaN(pen) || pen < 0) return showError('error-step-1', 'Introduzca un valor de penalización válido.');
+            if (!tRA || tRA < 1) return showError('error-step-1', 'Introduzca un número de RAs válido.');
+
+            config.totalQuestions = tQ;
+            config.penalty = pen;
+            config.numRAs = tRA;
+
+            document.getElementById('target-questions').textContent = tQ;
+            renderStep2Inputs(tRA);
+            hideError('error-step-1');
+            showScreen('step2');
+        }
+
+        function renderStep2Inputs(count) {
+            const container = document.getElementById('ra-questions-container');
+            container.innerHTML = '';
+            for (let i = 1; i <= count; i++) {
+                container.innerHTML += `
+                    <div class="ra-input-item">
+                        <label>Preguntas para RA ${i}</label>
+                        <input type="number" class="ra-q-input" data-index="${i}" placeholder="0" min="1">
+                    </div>
+                `;
+            }
+        }
+
+        function resetToStep1() {
+            showScreen('step1');
+        }
+
+        // STEP 2 LOGIC
+        function goToStep3() {
+            const inputs = document.querySelectorAll('.ra-q-input');
+            let totalAssigned = 0;
+            let currentRaQuestions = [];
+
+            let allFilled = true;
+            inputs.forEach(input => {
+                const val = parseInt(input.value);
+                if (!val || val < 0) allFilled = false;
+                else {
+                    totalAssigned += val;
+                    currentRaQuestions.push(val);
+                }
+            });
+
+            if (!allFilled) return showError('error-step-2', 'Por favor indique las preguntas para todos los RAs.');
+            
+            if (totalAssigned !== config.totalQuestions) {
+                return showError('error-step-2', `La suma de preguntas (${totalAssigned}) no coincide con el total (${config.totalQuestions}).`);
+            }
+
+            config.raQuestions = currentRaQuestions;
+            renderStep3Inputs();
+            hideError('error-step-2');
+            showScreen('step3');
+        }
+
+        function backToStep2() {
+            showScreen('step2');
+        }
+
+        function renderStep3Inputs() {
+            const container = document.getElementById('ra-grading-container');
+            container.innerHTML = '';
+            config.raQuestions.forEach((qCount, index) => {
+                const raNum = index + 1;
+                container.innerHTML += `
+                    <div class="ra-input-item">
+                        <div class="ra-title">RA ${raNum} (${qCount} pregs)</div>
+                        <div class="row">
+                            <div class="col">
+                                <label>Aciertos</label>
+                                <input type="number" class="ra-hits" data-index="${index}" placeholder="0" min="0" max="${qCount}">
+                            </div>
+                            <div class="col">
+                                <label>Fallos</label>
+                                <input type="number" class="ra-misses" data-index="${index}" placeholder="0" min="0" max="${qCount}">
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        // STEP 3 & CALCULATION LOGIC
+        function calculateFinalGrade() {
+            const hitsInputs = document.querySelectorAll('.ra-hits');
+            const missesInputs = document.querySelectorAll('.ra-misses');
+            let isValid = true;
+            let resultsHTML = '';
+            let finalSum = 0;
+
+            const weightPerRA = 10 / config.numRAs;
+
+            for (let i = 0; i < config.numRAs; i++) {
+                const hits = parseInt(hitsInputs[i].value) || 0;
+                const misses = parseInt(missesInputs[i].value) || 0;
+                const totalQ = config.raQuestions[i];
+
+                if (hits + misses > totalQ) {
+                    isValid = false;
+                    showError('error-step-3', `En RA ${i+1}, la suma de aciertos y fallos no puede superar ${totalQ}.`);
+                    break;
+                }
+                if (hits < 0 || misses < 0) {
+                    isValid = false; break;
+                }
+
+                // Calculation
+                // Puntuación_Neta_RA = Aciertos - (Fallos * Valor_Resta)
+                const netScore = hits - (misses * config.penalty);
+                
+                // Nota_RA = (Puntuación_Neta_RA / Preguntas_Totales_Del_RA) * Peso_Por_RA
+                // Clamped to 0 if negative
+                let raGradeWeighted = (netScore / totalQ) * weightPerRA;
+                if (raGradeWeighted < 0) raGradeWeighted = 0;
+
+                // Also calculate normalized 0-10 grade for display purposes
+                // If netScore is negative, raw grade is 0. 
+                // Max possible score for this RA is weightPerRA.
+                // Scaled to 10: (raGradeWeighted / weightPerRA) * 10 
+                let raGradeScaled = (raGradeWeighted / weightPerRA) * 10;
+                if (raGradeScaled < 0) raGradeScaled = 0;
+
+                finalSum += raGradeWeighted;
+
+                resultsHTML += `
+                    <tr>
+                        <td>RA ${i+1}</td>
+                        <td class="num">${netScore.toFixed(2)}</td>
+                        <td class="num">${raGradeScaled.toFixed(2)}</td>
+                        <td class="num"><strong>${raGradeWeighted.toFixed(2)}</strong></td>
+                    </tr>
+                `;
+            }
+
+            if (!isValid) return; // Error already shown
+
+            hideError('error-step-3');
+            document.getElementById('results-body').innerHTML = resultsHTML;
+            document.getElementById('final-score-display').textContent = finalSum.toFixed(2);
+            showScreen('results');
+        }
+
+        function resetGrading() {
+            // Clear inputs in step 3
+            document.querySelectorAll('.ra-hits').forEach(i => i.value = '');
+            document.querySelectorAll('.ra-misses').forEach(i => i.value = '');
+            showScreen('step3');
+        }
+
+        function fullReset() {
+            // Clear all state and inputs
+             document.getElementById('totalQuestions').value = '';
+             document.getElementById('penaltyValue').value = '';
+             document.getElementById('totalRAs').value = '';
+             config = { totalQuestions: 0, penalty: 0, numRAs: 0, raQuestions: [] };
+             showScreen('step1');
+        }
+
+        function showError(elementId, msg) {
+            const el = document.getElementById(elementId);
+            el.textContent = msg;
+            el.style.display = 'block';
+        }
+
+        function hideError(elementId) {
+            document.getElementById(elementId).style.display = 'none';
+        }
+
+    </script>
+</body>
+</html>
