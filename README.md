@@ -35,4 +35,4 @@ El código se distribuye bajo la licencia **MIT**: puedes usarlo, modificarlo y 
 
 Creado por **Vera López**, enfermera de emergencias, profesora de FP y fundadora de [SanidadEdTech](https://sanidadedtech.es).
 
-[CV](https://sobremi.sanidadedtech.es) · [LinkedIn](https://www.linkedin.com/in/vera-l%C3%B3pez-15603625a/) · [GitHub](https://github.com/SanidadEdtech)
+[CV](https://sobremi.sanidadedtech.es) · [LinkedIn](https://www.linkedin.com/in/veralopez-sanidadedtech/) · [GitHub](https://github.com/SanidadEdtech)
